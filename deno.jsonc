@@ -1,0 +1,23 @@
+{
+  "name": "@duesabati/sundial",
+  "description": "Sun related movements, positions and times calculations.",
+  "version": "0.1.0",
+  "exports": "./index.ts",
+
+  "fmt": {
+    "semiColons": false,
+    "singleQuote": true,
+    "indentWidth": 2,
+    "lineWidth": 80,
+    "trailingCommas": "never"
+  },
+
+  "lint": {
+    "rules": {
+      "exclude": [
+        "no-explicit-any",
+        "ban-types"
+      ]
+    }
+  }
+}

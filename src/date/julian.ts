@@ -1,3 +1,6 @@
+/**
+ * Represents a Julian date.
+ */
 export class Julian {
   static Day: { Of(date: Date): number } = {
     /**

@@ -44,7 +44,7 @@ export const normalizeIn = (a: Degree, b: Degree) => {
   return (θ: Degree): Degree => {
     const range = b - a
     const normalized = ((θ - a) % range + range) % range + a
-    return Number(normalized.toFixed(5))
+    return normalized
   }
 }
 

@@ -28,7 +28,7 @@ export class Julian {
         Math.floor(y / 100) +
         Math.floor(y / 400) -
         32045
-    },
+    }
   }
 
   static Date = {
@@ -50,7 +50,7 @@ export class Julian {
         (hour + minute / 60 + second / 3600 + millisecond / 3600000) / 24
 
       return jdn + dayFraction - 0.5
-    },
+    }
   }
 
   static FromGregorian(date: Date): Julian {
@@ -64,8 +64,9 @@ export class Julian {
     return Math.floor(this.jdate)
   }
 
-  get SinceJ2000(): number {
-    return (this.jdate - 2451545) / 36525
+  get SinceJ2000(): { Day: number; Century: number } {
+    const days = this.jdate - 2451545
+    return { Day: days, Century: days / 36525 }
   }
 
   get Date(): number {
@@ -116,7 +117,7 @@ export class Julian {
 
     // Step 5. Return final UTC date
     return new Date(
-      Date.UTC(year, month - 1, day, hour, minute, second, millisecond),
+      Date.UTC(year, month - 1, day, hour, minute, second, millisecond)
     )
   }
 

@@ -5,7 +5,7 @@ import { Times } from './times.ts'
 const DATE = new Date('2025-01-01T12:00:00Z')
 
 Deno.test('Given a Date, it return day length', () => {
-  const times = Times.Of(DATE, [45.46416, 9.19199])
+  const times = Times.On(DATE).At(45.46416, 9.19199)
 
   const h = times.DayLength.String
 
@@ -13,15 +13,15 @@ Deno.test('Given a Date, it return day length', () => {
 })
 
 Deno.test('Given a Date, it return sunrise time', () => {
-  const times = Times.Of(DATE, [45.46416, 9.19199])
+  const times = Times.On(DATE).At(45.46416, 9.19199)
 
   const h = times.Sunrise.String
 
-  expect(h).toBe('07:03:13')
+  expect(h).toBe('07:03:12')
 })
 
 Deno.test('Given a Date, it return sunset time', () => {
-  const times = Times.Of(DATE, [45.46416, 9.19199])
+  const times = Times.On(DATE).At(45.46416, 9.19199)
 
   const h = times.Sunset.String
 

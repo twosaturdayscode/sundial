@@ -1,6 +1,46 @@
+import { Angle } from './angle.ts'
 import { Coordinates } from './coordinates.ts'
 
-import { arccos, cos, sin } from '../trigonometry.ts'
+/**
+ * Given a decimal hour representation, formats it as hours, minutes, seconds
+ * and milliseconds or a string representation.
+ */
+class FormattedHours {
+  static FromDecimal(hours: number): FormattedHours {
+    return new FormattedHours(hours)
+  }
+
+  constructor(private readonly hours: number) {}
+
+  get Hours(): number {
+    return this.hours
+  }
+
+  get String(): string {
+    const h = Math.floor(this.hours)
+    const m = Math.floor((this.hours - h) * 60)
+    const s = Math.floor(((this.hours - h) * 60 - m) * 60)
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${
+      s.toString().padStart(2, '0')
+    }`
+  }
+
+  get Minutes(): number {
+    return Math.floor((this.hours - Math.floor(this.hours)) * 60)
+  }
+
+  get Seconds(): number {
+    return Math.floor(
+      ((this.hours - Math.floor(this.hours)) * 60 - this.Minutes) * 60
+    )
+  }
+
+  get Milliseconds(): number {
+    return Math.floor(
+      ((this.hours - Math.floor(this.hours)) * 60 - this.Minutes) * 60 * 1000
+    )
+  }
+}
 
 /**
  * Astronomical sunrise and sunset occur at α=0. However, due to the refraction
@@ -9,43 +49,28 @@ import { arccos, cos, sin } from '../trigonometry.ts'
  */
 const ZERO_ANGLE = 0.833
 
+/**
+ * Represents the times of solar events (sunrise, sunset, etc.) for a specific
+ * location and date.
+ */
 export class Times {
-  static Of(
-    date: Date,
-    position: [latitude: number, longitude: number, altitude?: number]
-  ): Times {
-    const coordinates = Coordinates.On(date)
-    return new Times(coordinates, position)
+  static On(date: Date): { At(lat: number, lon: number, alt?: number): Times } {
+    return {
+      At: (lat: number, lon: number, alt?: number): Times => {
+        const position: [number, number, number?] = [lat, lon, alt]
+        const coordinates = Coordinates.On(date)
+        const angle = Angle.On(date, [lat])
+
+        return new Times(coordinates, angle, position)
+      }
+    }
   }
 
   private constructor(
     private readonly coordinates: Coordinates,
+    private readonly angle: Angle,
     private readonly position: [number, number, number?]
   ) {
-  }
-
-  /**
-   * Computes the hour angle of the Sun for a given altitude
-   *
-   * @param a Sun altitude in degrees
-   * @returns Hour angle in degrees
-   * @throws If the Sun never rises or never sets on this date at this location
-   */
-  private HourAngleAt(a: number) {
-    const [lat] = this.position
-
-    const { declination } = this.coordinates
-    const sinH = (-sin(a) - sin(lat) * sin(declination)) /
-      (cos(lat) * cos(declination))
-
-    if (sinH > 1) {
-      throw new Error('Sun never rises at this location on this date')
-    }
-    if (sinH < -1) {
-      throw new Error('Sun never sets at this location on this date')
-    }
-
-    return arccos(sinH)
   }
 
   /**
@@ -53,9 +78,10 @@ export class Times {
    *
    * @returns Solar noon in hours (decimal)
    */
-  private TrueMidday() {
+  get Noon(): FormattedHours {
     const [, longitude] = this.position
-    return 12 - longitude / 15 - this.coordinates.EqT
+    const h = 12 - longitude / 15 - this.coordinates.EqT
+    return FormattedHours.FromDecimal(h)
   }
 
   /**
@@ -64,12 +90,13 @@ export class Times {
    * @param alt Optional altitude of the observer above sea level in meters
    * @returns Time of sunrise in hours (decimal)
    */
-  get Sunrise() {
+  get Sunrise(): FormattedHours {
     const [, , alt] = this.position
     const h0 = ZERO_ANGLE - 0.0347 * Math.sqrt(alt ?? 0)
-    const h = this.TrueMidday() - this.HourAngleAt(h0) / 15
 
-    return { Hours: h, String: this.Print(h) }
+    const h = this.Noon.Hours - this.angle.HourAt(h0) / 15
+
+    return FormattedHours.FromDecimal(h)
   }
 
   /**
@@ -78,12 +105,12 @@ export class Times {
    * @param alt Optional altitude of the observer above sea level in meters
    * @returns Time of sunset in hours (decimal)
    */
-  get Sunset() {
+  get Sunset(): FormattedHours {
     const [, , alt] = this.position
     const h0 = ZERO_ANGLE - 0.0347 * Math.sqrt(alt ?? 0)
-    const h = this.TrueMidday() + this.HourAngleAt(h0) / 15
+    const h = this.Noon.Hours + this.angle.HourAt(h0) / 15
 
-    return { Hours: h, String: this.Print(h) }
+    return FormattedHours.FromDecimal(h)
   }
 
   /**
@@ -92,31 +119,12 @@ export class Times {
    * @param alt Optional altitude of the observer above sea level in meters
    * @returns Day length in hours
    */
-  get DayLength() {
+  get DayLength(): FormattedHours {
     // const h0 = ZERO_ANGLE - 0.0347 * Math.sqrt(this.altitude || 0)
     // return 2 * (this.HourAngleAt(h0) / 15)
 
     const h = this.Sunset.Hours - this.Sunrise.Hours
 
-    return {
-      Hours: h,
-      Minutes: h * 60,
-      Seconds: h * 3600,
-      Milliseconds: h * 3600 * 1000,
-      String: this.Print(h)
-    }
-  }
-
-  private Print(hours: number) {
-    const h = Math.floor(hours)
-    const m = Math.floor((hours - h) * 60)
-    const s = Math.round(((hours - h) * 60 - m) * 60)
-
-    // Pad with zeros for proper formatting
-    const hh = h.toString().padStart(2, '0')
-    const mm = m.toString().padStart(2, '0')
-    const ss = s.toString().padStart(2, '0')
-
-    return `${hh}:${mm}:${ss}`
+    return FormattedHours.FromDecimal(h)
   }
 }

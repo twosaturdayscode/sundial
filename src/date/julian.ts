@@ -1,5 +1,5 @@
 export class Julian {
-  static Day = {
+  static Day: { Of(date: Date): number } = {
     /**
      * Convert a Gregorian calendar date to Julian Day Number (JDN)
      * using the Fliegel–Van Flandern algorithm.
@@ -31,7 +31,7 @@ export class Julian {
     }
   }
 
-  static Date = {
+  static Date: { Of(date: Date): number } = {
     /**
      * Convert a Gregorian date to Julian Date
      * @param date - The Gregorian date to convert

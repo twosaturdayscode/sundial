@@ -1,7 +1,7 @@
 {
   "name": "@duesabati/sundial",
   "description": "Sun related movements, positions and times calculations.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "exports": "./index.ts",
 
   "fmt": {

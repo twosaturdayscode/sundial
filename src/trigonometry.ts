@@ -5,14 +5,14 @@ export type Degree = number
  * @param d - degrees
  * @returns radians
  */
-export const dtr = (d: Degree) => Number(((d * Math.PI) / 180.0).toFixed(5))
+export const dtr = (d: Degree) => (d * Math.PI) / 180.0
 
 /**
  * Convert radians to degrees
  * @param r - radians
  * @returns degrees
  */
-export const rtd = (r: number) => Number(((r * 180.0) / Math.PI).toFixed(5))
+export const rtd = (r: number) => (r * 180.0) / Math.PI
 
 // Direct trigonometric functions (input in degrees, output in ratio)
 export const sin = (d: Degree) => Math.sin(dtr(d))
